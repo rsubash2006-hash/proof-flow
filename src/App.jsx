@@ -35,8 +35,67 @@ function readDemoSession() {
     return null
   }
 }
+function formatInlineMarkdown(text) {
+  return text.split(/(`[^`]+`|\*\*.*?\*\*|\*[^*]+\*)/g).map((part, index) => {
+    if (part.startsWith('`') && part.endsWith('`')) {
+      return <code key={index}>{part.slice(1, -1)}</code>
+    }
 
-function App() {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>
+    }
+
+    if (part.startsWith('*') && part.endsWith('*')) {
+      return <em key={index}>{part.slice(1, -1)}</em>
+    }
+
+    return part
+  })
+}
+function AiAnalysisReport({ content }) {
+  return (
+    <div className="ai-report">
+      {content.split('\n').map((line, index) => {
+        const trimmed = line.trim()
+
+        if (!trimmed) return null
+
+        // Markdown headings
+        if (/^#{1,4}\s/.test(trimmed)) {
+          const heading = trimmed.replace(/^#{1,4}\s*/, '')
+
+          return (
+            <h4 key={index}>
+              {formatInlineMarkdown(heading)}
+            </h4>
+          )
+        }
+
+        // Markdown separators
+        if (/^[-*_]{3,}$/.test(trimmed)) {
+          return <hr key={index} />
+        }
+
+        // Bullet points
+        if (/^[-*•]\s/.test(trimmed)) {
+          return (
+            <p className="ai-report-bullet" key={index}>
+              <span>• </span>
+              {formatInlineMarkdown(trimmed.replace(/^[-*•]\s*/, ''))}
+            </p>
+          )
+        }
+
+        // Normal paragraphs
+        return (
+          <p key={index}>
+            {formatInlineMarkdown(trimmed)}
+          </p>
+        )
+      })}
+    </div>
+  )
+}function App() {
   const [account, setAccount] = useState(readDemoSession)
   const [page, setPage] = useState(() =>
     readDemoSession() ? 'home' : 'login'
@@ -903,22 +962,24 @@ const filteredTransactions = transactions.filter((item) => {
     {aiLoading ? 'Analyzing...' : 'Analyze with AI'}
     {!aiLoading && <span> ↗</span>}
   </button>
+  
 
   {aiError && (
     <p className="demo-note">{aiError}</p>
   )}
 
   {aiAnalysis && (
-    <div>
-      <h3>Analysis report</h3>
-      <p style={{ whiteSpace: 'pre-wrap' }}>
-        {aiAnalysis.analysis}
-      </p>
-      <p className="demo-note">
-        {aiAnalysis.disclaimer}
-      </p>
-    </div>
-  )}
+  <div>
+    <h3>Analysis report</h3>
+
+    <AiAnalysisReport content={aiAnalysis.analysis} />
+    
+
+    <p className="demo-note">
+      {aiAnalysis.disclaimer}
+    </p>
+  </div>
+)}
 </article>      
             <article className="detail-card resolution-card">
               <p className="section-kicker">INVESTIGATION OUTCOME</p>
