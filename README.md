@@ -1,4 +1,4 @@
-# ProofFlow
+﻿# ProofFlow
 ### Every transaction. One clear picture.
 
 ProofFlow is an AI-assisted payment investigation and reconciliation dashboard designed to help users review payment transactions, organize supporting evidence, record investigation decisions, and understand potential transaction concerns.
