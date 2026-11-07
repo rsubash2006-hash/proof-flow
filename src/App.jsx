@@ -106,9 +106,9 @@ function AiAnalysisReport({ content }) {
 const [transactions, setTransactions] = useState(() => {
   try {
     const saved = localStorage.getItem('proofflow-investigations')
-    return saved ? JSON.parse(saved) : initialTransactions
+    return saved ? JSON.parse(saved) : []
   } catch {
-    return initialTransactions
+    return []
   }
 })
 
@@ -212,6 +212,8 @@ const mergedTransactions = mappedTransactions.map((transaction) => {
 
   return {
     ...transaction,
+    ...saved,
+    ...transaction,
     status: saved.status,
     tone: saved.tone,
     detail: saved.detail,
@@ -219,11 +221,22 @@ const mergedTransactions = mappedTransactions.map((transaction) => {
   }
 })
 
-setTransactions(
-  mergedTransactions.length ? mergedTransactions : initialTransactions
+// Preserve previously saved transactions not returned by PayPal
+const paypalReferences = new Set(
+  mappedTransactions.map((transaction) => transaction.reference)
 )
-setApiStatus(mergedTransactions.length ? 'connected' : 'empty')
 
+const preservedTransactions = savedInvestigations.filter(
+  (saved) => !paypalReferences.has(saved.reference)
+)
+
+const finalTransactions = [
+  ...mergedTransactions,
+  ...preservedTransactions,
+]
+
+setTransactions(finalTransactions)
+setApiStatus(mappedTransactions.length ? 'connected' : 'empty')
     } catch (error) {
       if (cancelled) return
 
