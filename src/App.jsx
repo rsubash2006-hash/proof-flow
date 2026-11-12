@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react'
 import LightPillar from './components/LightPillar.jsx'
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
 
 const initialTransactions = [
   {
@@ -142,7 +143,7 @@ useEffect(() => {
       setApiStatus('loading')
       setApiError('')
 
-      const response = await fetch('/api/paypal/transactions')
+      const response = await fetch(`${API_BASE_URL}/paypal/transactions`)
 
       if (!response.ok) {
         throw new Error(`API request failed (${response.status})`)
@@ -263,7 +264,7 @@ setApiStatus(mappedTransactions.length ? 'connected' : 'empty')
   setAiAnalysis(null)
 
   try {
-    const response = await fetch('/api/ai/analyze-transaction', {
+    const response = await fetch(`${API_BASE_URL}/ai/analyze-transaction`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
